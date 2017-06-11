@@ -71,11 +71,14 @@ public class WorkOrder implements Comparable<WorkOrder> {
     private ClassLevel calculateLevel() {
         if ((ID % PRIORITY == 0) && (ID % VIP == 0)) {
             return ClassLevel.Manager;
-        } else if (ID % VIP == 0) {
+        }
+        else if (ID % VIP == 0) {
             return ClassLevel.VIP;
-        } else if (ID % PRIORITY == 0) {
+        }
+        else if (ID % PRIORITY == 0) {
             return ClassLevel.Priority;
-        } else {
+        }
+        else {
             return ClassLevel.Normal;
         }
     }
@@ -101,6 +104,25 @@ public class WorkOrder implements Comparable<WorkOrder> {
         }
         else {
             return Double.compare(this.calculateRank(), order.calculateRank());
+        }
+    }
+
+    /**
+     * Two work orders are considered equal if they have the same ID.
+     * Object must not be null, and must be an instance of WorkOrder
+     * @param order WorkOrder
+     * @return whether the objects are equal or not.
+     */
+    @Override
+    public boolean equals(Object order) {
+        if (order == null) {
+            return false;
+        }
+        else if (!(order instanceof WorkOrder)) {
+            return false;
+        }
+        else {
+            return ((WorkOrder) order).getId() == this.ID;
         }
     }
 

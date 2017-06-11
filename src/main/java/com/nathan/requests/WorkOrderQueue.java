@@ -24,11 +24,19 @@ public class WorkOrderQueue {
     /**
      * Adds a new order to the queue, then sorts.
      * Queue is sorted after every add to recalculate order's rank.
+     * Only one order from each ID is allowed in queue.
      * @param order to add to queue.
+     * @return whether enqueue was successful.
      */
-    public void enqueue(WorkOrder order) {
-        queue.add(order);
-        Collections.sort(queue);
+    public boolean enqueue(WorkOrder order) {
+        if (queue.contains(order)) {
+            return false;
+        }
+        else {
+            queue.add(order);
+            Collections.sort(queue);
+            return true;
+        }
     }
 
     /**
@@ -61,7 +69,8 @@ public class WorkOrderQueue {
      * @param ID of order to remove
      */
     public void removeOrder(long ID) {
-
+        queue.remove(new WorkOrder(ID));
+        Collections.sort(queue);
     }
 
     /**
@@ -71,7 +80,7 @@ public class WorkOrderQueue {
      *         -1 if ID is not present.
      */
     public int getPositionOfOrder(long ID) {
-        return 0;
+        return queue.indexOf(new WorkOrder(ID));
     }
 
     /**
@@ -79,7 +88,29 @@ public class WorkOrderQueue {
      * @return average wait time.
      */
     public double getAverageWaitTime() {
-        return 0;
+        double total = 0;
+
+        for (WorkOrder order : queue) {
+            total += order.getWaitTime();
+        }
+
+        return total / queue.size();
+    }
+
+    /**
+     * Check if order is in queue.
+     * @param order to search
+     * @return true if it's in queue
+     */
+    public boolean contains(WorkOrder order) {
+        return queue.contains(order);
+    }
+
+    /**
+     * @return number of orders in queue.
+     */
+    public int size() {
+        return queue.size();
     }
 }
 
