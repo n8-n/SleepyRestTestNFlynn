@@ -3,9 +3,16 @@ package com.nathan.requests;
 import java.util.Date;
 
 /**
- * Represents a work order request sent to Tim.
+ * Represents a work order request.
+ * A work order consists of an ID, date of creation,
+ * and class level, calculated using ID.
+ *
+ * Implements comparable interface to allow a
+ * custom sorting method.
+ *
+ * @author Nathan
  */
-public class WorkOrder {
+public class WorkOrder implements Comparable<WorkOrder> {
     /**
      * Definition of class level for each user.
      */
@@ -26,10 +33,11 @@ public class WorkOrder {
     private ClassLevel level;
 
     /**
-     * Creates a new order with ID.
+     * CONSTRUCTOR: Creates a new order with ID.
      * Date is set as time of creation.
      * ClassLevel is calculated based on ID.
-     * @param ID Identifier of the person who made the request.
+     *
+     * @param ID of the person who made the request.
      */
     public WorkOrder(long ID) {
         this.ID = ID;
@@ -39,12 +47,15 @@ public class WorkOrder {
 
     /**
      * Calculates how long the order has been waiting in seconds.
-     * @return long
+     *
+     * @return wait time
      */
-    public long getWaitTime() {
+    public double getWaitTime() {
         Date now = new Date();
         // gets difference in milliseconds.
-        long timeDifference = now.getTime() - date.getTime();
+        double timeDifference = now.getTime() - date.getTime();
+
+        System.out.println("In Seconds: " +timeDifference / 1000);
 
         return timeDifference / 1000; // return time in seconds.
     }
@@ -54,21 +65,73 @@ public class WorkOrder {
      * Divisible by 5 are VIP.
      * Divisible by 3 and 5 are manager.
      * The rest are normal.
+     *
      * @return ClassLevel
      */
     private ClassLevel calculateLevel() {
         if ((ID % PRIORITY == 0) && (ID % VIP == 0)) {
             return ClassLevel.Manager;
-        }
-        else if (ID % VIP == 0) {
+        } else if (ID % VIP == 0) {
             return ClassLevel.VIP;
-        }
-        else if (ID % PRIORITY == 0) {
+        } else if (ID % PRIORITY == 0) {
             return ClassLevel.Priority;
-        }
-        else {
+        } else {
             return ClassLevel.Normal;
         }
+    }
+
+    /**
+     * Custom compare for sorting WorkOrders.
+     * Management IDs are always higher than non-management.
+     * If both orders are management, or both are not, then
+     * sort by rank.
+     */
+    @Override
+    public int compareTo(WorkOrder order) {
+        // if objects are equal, return 0
+        // if this is less than order, return negative value
+        // if this is greater than order, return positive value
+        if ((level == ClassLevel.Manager) &&
+                (order.getClassLevel() != ClassLevel.Manager)) {
+            return 1;
+        }
+        else if ((order.getClassLevel() == ClassLevel.Manager) &&
+                (level != ClassLevel.Manager)) {
+            return -1;
+        }
+        else {
+            return Double.compare(this.calculateRank(), order.calculateRank());
+        }
+    }
+
+    /**
+     * Calculate an orders rank based on class level and wait time.
+     * Priority orders rank is equal to max(3, n log n),
+     * where n is waitTime.
+     * VIP orders rank is equal to max(4, 2n log n)
+     * Management and normal orders rank is equal to wait time.
+     * @return rank
+     */
+    public double calculateRank(double waitTime) {
+        if (level == ClassLevel.Priority) {
+            return Math.max(3, waitTime * Math.log(waitTime));
+        }
+        else if (level == ClassLevel.VIP) {
+            return Math.max(4, 2 * waitTime * Math.log(waitTime));
+        }
+        else {
+            return waitTime;
+        }
+    }
+
+    /**
+     * Calculate an orders rank based on class level and wait time.
+     * If no waitTime is given, calculate it.
+     * @return rank
+     */
+    public double calculateRank() {
+        double waitTime = getWaitTime();
+        return calculateRank(waitTime);
     }
 
     /*
