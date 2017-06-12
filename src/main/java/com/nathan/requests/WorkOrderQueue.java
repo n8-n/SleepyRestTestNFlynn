@@ -25,28 +25,38 @@ public class WorkOrderQueue {
      * Adds a new order to the queue, then sorts.
      * Queue is sorted after every add to recalculate order's rank.
      * Only one order from each ID is allowed in queue.
+     * ID must be positive.
      * @param order to add to queue.
      * @return whether enqueue was successful.
      */
     public boolean enqueue(WorkOrder order) {
-        if (queue.contains(order)) {
-            return false;
+        boolean result;
+
+        if (queue.contains(order) || (order.getId() <= 0)) {
+            result =  false;
         }
         else {
-            queue.add(order);
+            result = queue.add(order);
             Collections.sort(queue);
-            return true;
         }
+
+        return result;
     }
 
     /**
      * Removes the highest ranked order from the queue.
+     * If queue is empty, return null.
      * @return top order
      */
     public WorkOrder dequeue() {
-        WorkOrder order = queue.remove(0);
-        Collections.sort(queue);
-        return order;
+        if (queue.size() == 0) {
+            return null;
+        }
+        else {
+            WorkOrder order = queue.remove(0);
+            Collections.sort(queue);
+            return order;
+        }
     }
 
     /**
@@ -65,12 +75,20 @@ public class WorkOrderQueue {
     }
 
     /**
-     * Removes specified order.
+     * Removes specified order if ID is positive
+     * and queue is not empty.
      * @param ID of order to remove
+     * @return whether removal was successful or not
      */
-    public void removeOrder(long ID) {
-        queue.remove(new WorkOrder(ID));
-        Collections.sort(queue);
+    public boolean removeOrder(long ID) {
+        boolean result = false;
+
+        if ((queue.size() > 0) || (ID > 0)) {
+            result = queue.remove(new WorkOrder(ID));
+            Collections.sort(queue);
+        }
+
+        return result;
     }
 
     /**
@@ -86,24 +104,28 @@ public class WorkOrderQueue {
     /**
      * Get the average wait time of all orders.
      * @return average wait time.
+     *         0 if empty list
      */
     public double getAverageWaitTime() {
         double total = 0;
 
-        for (WorkOrder order : queue) {
-            total += order.getWaitTime();
-        }
+        if (queue.size() != 0) {
+            for (WorkOrder order : queue) {
+                total += order.getWaitTime();
+            }
 
-        return total / queue.size();
+            total /= queue.size();
+        }
+        return total;
     }
 
     /**
-     * Check if order is in queue.
-     * @param order to search
+     * Check if order ID is in queue.
+     * @param ID to search
      * @return true if it's in queue
      */
-    public boolean contains(WorkOrder order) {
-        return queue.contains(order);
+    public boolean contains(long ID) {
+        return queue.contains(new WorkOrder(ID));
     }
 
     /**

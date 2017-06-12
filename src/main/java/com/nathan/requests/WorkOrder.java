@@ -1,5 +1,7 @@
 package com.nathan.requests;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
@@ -27,6 +29,9 @@ public class WorkOrder implements Comparable<WorkOrder> {
     private static final int PRIORITY = 3;
     private static final int VIP = 5;
 
+    // Pattern for extracting Date
+    private static final String stringFormat = "yyyy-MM-dd_HH:mm";
+
     // Member variables.
     private long ID;
     private Date date;
@@ -46,6 +51,25 @@ public class WorkOrder implements Comparable<WorkOrder> {
     }
 
     /**
+     * CONSTRUCTOR: Create a new order with ID and specified Date.
+     *
+     * @param ID of person who made request.
+     * @param dateString string representation of date.
+     */
+    public WorkOrder(long ID, String dateString) {
+        this.ID = ID;
+        level = calculateLevel();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(stringFormat);
+
+        try {
+            date = simpleDateFormat.parse(dateString);
+        } catch (ParseException e) {
+            date = new Date();
+            e.printStackTrace();
+        }
+    }
+
+    /**
      * Calculates how long the order has been waiting in seconds.
      *
      * @return wait time
@@ -54,8 +78,6 @@ public class WorkOrder implements Comparable<WorkOrder> {
         Date now = new Date();
         // gets difference in milliseconds.
         double timeDifference = now.getTime() - date.getTime();
-
-        System.out.println("In Seconds: " +timeDifference / 1000);
 
         return timeDifference / 1000; // return time in seconds.
     }
@@ -91,19 +113,18 @@ public class WorkOrder implements Comparable<WorkOrder> {
      */
     @Override
     public int compareTo(WorkOrder order) {
-        // if objects are equal, return 0
-        // if this is less than order, return negative value
-        // if this is greater than order, return positive value
+        // if compared order is less than this, return negative value
+        // if compared order is greater than this, return positive value
         if ((level == ClassLevel.Manager) &&
                 (order.getClassLevel() != ClassLevel.Manager)) {
-            return 1;
+            return -1;
         }
         else if ((order.getClassLevel() == ClassLevel.Manager) &&
                 (level != ClassLevel.Manager)) {
-            return -1;
+            return 1;
         }
         else {
-            return Double.compare(this.calculateRank(), order.calculateRank());
+            return Double.compare(order.calculateRank(), this.calculateRank());
         }
     }
 

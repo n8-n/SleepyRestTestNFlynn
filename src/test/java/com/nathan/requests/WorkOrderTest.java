@@ -1,6 +1,11 @@
 package com.nathan.requests;
 
 import org.junit.*;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+
 import static org.junit.Assert.*;
 
 /**
@@ -10,13 +15,14 @@ import static org.junit.Assert.*;
  */
 public class WorkOrderTest {
     // some example IDs to use in testing.
-    private int normalID = 1;
-    private int priorityID = 6;
-    private int vipID = 10;
-    private int managerID = 15;
+    private final long normalID = 1;
+    private final long priorityID = 6;
+    private final long vipID = 10;
+    private final long managerID = 15;
+    private final long sleepTime = 100; // used to increase WorkOrder waitTime
 
     // --------------------------------------------------
-    // WorkOrder level assignment tests
+    // WorkOrder Construction
     // --------------------------------------------------
     @Test
     public void newWorkOrder_IDsNotDivisibleBy3And5_ShouldBeNormal() {
@@ -38,27 +44,36 @@ public class WorkOrderTest {
         WorkOrder workOrder = new WorkOrder(managerID);
         assertEquals(workOrder.getClassLevel(), WorkOrder.ClassLevel.Manager);
     }
+    @Test
+    public void WorkOrder_DateStringConstructor_ShouldBeParsedCorrectly() {
+        WorkOrder workOrder = new WorkOrder(normalID, "1994-01-07_12:02");
+        Calendar cal = new GregorianCalendar(1994, 0, 7, 12, 2);
+        Date testDate = cal.getTime();
+
+        assertEquals(testDate, workOrder.getDate());
+    }
 
 
-    // Order wait time should always be a positive number
+    // --------------------------------------------------
+    // getWaitTime
+    // --------------------------------------------------
     @Test
     public void getWaitTime_WaitTime_ShouldBeGreaterThanZero() throws InterruptedException {
         WorkOrder workOrder = new WorkOrder(normalID);
 
         // sleep for a few milliseconds.
-        Thread.sleep( 1234 );
+        Thread.sleep(sleepTime);
         double waitTime = workOrder.getWaitTime();
-
-        assertTrue( waitTime > 0 );
+        assertTrue(waitTime > 0);
     }
 
     // --------------------------------------------------
-    // calculateRank tests
+    // calculateRank
     // --------------------------------------------------
     @Test
     public void calculateRank_NormalRank_ShouldBeEqualToWaitTime() throws InterruptedException {
         WorkOrder workOrder = new WorkOrder(normalID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         double waitTime = workOrder.getWaitTime();
         double rank = workOrder.calculateRank(waitTime);
 
@@ -66,31 +81,29 @@ public class WorkOrderTest {
         assertEquals(rank, waitTime, 0);
     }
     @Test
-    public void calculateRank_PriorityRank_ShouldBeEqualToMaxOf3andNLogN() throws InterruptedException {
+    public void calculateRank_PriorityRank_ShouldBeEqualToMaxOfThreeAndNLogN() throws InterruptedException {
         WorkOrder workOrder = new WorkOrder(priorityID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         double waitTime = workOrder.getWaitTime();
         double rank = workOrder.calculateRank(waitTime);
 
         waitTime = Math.max(3, waitTime * Math.log(waitTime));
-
         assertEquals(rank, waitTime, 0);
     }
     @Test
-    public void calculateRank_VIPRank_ShouldBeEqualToMaxOf4and2NLogN() throws InterruptedException {
+    public void calculateRank_VIPRank_ShouldBeEqualToMaxOfFourAndNLogN() throws InterruptedException {
         WorkOrder workOrder = new WorkOrder(vipID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         double waitTime = workOrder.getWaitTime();
         double rank = workOrder.calculateRank(waitTime);
 
         waitTime = Math.max(4, 2 * waitTime * Math.log(waitTime));
-
         assertEquals(rank, waitTime, 0);
     }
     @Test
     public void calculateRank_ManagerRank_ShouldBeEqualToWaitTime() throws InterruptedException {
         WorkOrder workOrder = new WorkOrder(managerID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         double waitTime = workOrder.getWaitTime();
         double rank = workOrder.calculateRank(waitTime);
 
@@ -98,34 +111,35 @@ public class WorkOrderTest {
     }
 
     // --------------------------------------------------
-    // compareTo tests
+    // compareTo
     // --------------------------------------------------
     @Test
-    public void compareTo_ManagerComparedToNormal_ResultShouldBe1() {
+    public void compareTo_ManagerComparedToNormal_ResultShouldBeMinusNegative() {
         WorkOrder managerOrder = new WorkOrder(managerID);
         WorkOrder normalOrder = new WorkOrder(normalID);
 
-        assertTrue(managerOrder.compareTo(normalOrder) == 1);
+        assertTrue(managerOrder.compareTo(normalOrder) < 0);
     }
     @Test
-    public void compareTo_NormalComparedToManager_ResultShouldBeMinus1() {
+    public void compareTo_NormalComparedToManager_ResultShouldBePositive() {
         WorkOrder managerOrder = new WorkOrder(managerID);
         WorkOrder normalOrder = new WorkOrder(normalID);
 
-        assertTrue(normalOrder.compareTo(managerOrder) == -1);
+        assertTrue(normalOrder.compareTo(managerOrder) > 0);
     }
     @Test
     public void compareTo_TwoNormalOrders_HigherWaitTimeShouldHaveHigherRank() throws InterruptedException {
         WorkOrder order1 = new WorkOrder(normalID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         WorkOrder order2 = new WorkOrder(normalID);
 
-        assertTrue(order1.compareTo(order2) > 0);
+        // result negative because order2 is less than order1
+        assertTrue(order1.compareTo(order2) < 0);
     }
 
 
     // --------------------------------------------------
-    // equals tests
+    // equals
     // --------------------------------------------------
     @Test
     public void equals_NullObject_ShouldBeFalse() {
@@ -135,8 +149,7 @@ public class WorkOrderTest {
     @Test
     public void equals_NonWorkOrderObject_ShouldBeFalse() {
         WorkOrder order = new WorkOrder(normalID);
-        Integer i = new Integer(normalID);
-        assertFalse(order.equals(i));
+        assertFalse(order.equals(normalID));
     }
     @Test
     public void equals_DifferentIDs_ShouldBeFalse() {
@@ -147,7 +160,7 @@ public class WorkOrderTest {
     @Test
     public void equals_SameIDsDifferentWaitTime_ShouldBeTrue() throws InterruptedException {
         WorkOrder order1 = new WorkOrder(normalID);
-        Thread.sleep(200);
+        Thread.sleep(sleepTime);
         WorkOrder order2 = new WorkOrder(normalID);
         assertTrue(order1.equals(order2));
     }
