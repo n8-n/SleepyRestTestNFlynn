@@ -13,6 +13,7 @@ import java.util.List;
  */
 public class WorkOrderQueue {
     private List<WorkOrder> queue;
+    private static final String currentTime = "now";
 
     /**
      * CONSTRUCTOR: Instantiates queue.
@@ -84,7 +85,7 @@ public class WorkOrderQueue {
         boolean result = false;
 
         if ((queue.size() > 0) || (ID > 0)) {
-            result = queue.remove(new WorkOrder(ID));
+            result = queue.remove(new WorkOrder(ID, currentTime));
             Collections.sort(queue);
         }
 
@@ -98,7 +99,7 @@ public class WorkOrderQueue {
      *         -1 if ID is not present.
      */
     public int getPositionOfOrder(long ID) {
-        return queue.indexOf(new WorkOrder(ID));
+        return queue.indexOf(new WorkOrder(ID, currentTime));
     }
 
     /**
@@ -125,7 +126,7 @@ public class WorkOrderQueue {
      * @return true if it's in queue
      */
     public boolean contains(long ID) {
-        return queue.contains(new WorkOrder(ID));
+        return queue.contains(new WorkOrder(ID, currentTime));
     }
 
     /**

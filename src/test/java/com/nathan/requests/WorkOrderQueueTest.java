@@ -8,6 +8,7 @@ import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.hamcrest.CoreMatchers.*;
+import static com.nathan.requests.TestConstants.*;
 
 /**
  * Tests WorkOrderQueue class
@@ -15,13 +16,6 @@ import static org.hamcrest.CoreMatchers.*;
  * @author Nathan
  */
 public class WorkOrderQueueTest {
-    // some example IDs to use in testing.
-    private final long normalID = 1;
-    private final long priorityID = 6;
-    private final long vipID = 10;
-    private final long managerID = 15;
-    private final long sleepTime = 100; // used to increase WorkOrder waitTime
-
     private WorkOrderQueue orderQueue;
 
     /**
@@ -37,18 +31,18 @@ public class WorkOrderQueueTest {
     // ---------------------------------------------
     @Test
     public void enqueue_AddOrder_OrderShouldBeInQueue() {
-        assertTrue(orderQueue.enqueue(new WorkOrder(normalID)));
-        assertTrue(orderQueue.contains(normalID));
+        assertTrue(orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME)));
+        assertTrue(orderQueue.contains(NORMAL_ID));
     }
     @Test
     public void enqueue_AddDuplicateOrder_OrderShouldNotBeInQueue() {
-        WorkOrder order = new WorkOrder(normalID);
+        WorkOrder order = new WorkOrder(NORMAL_ID, CURRENT_TIME);
         orderQueue.enqueue(order);
         assertFalse(orderQueue.enqueue(order));
     }
     @Test
     public void enqueue_AddNegativeID_OrderShouldNotBeInQueue() {
-        WorkOrder negativeID = new WorkOrder(-1);
+        WorkOrder negativeID = new WorkOrder(NEGATIVE_ID, CURRENT_TIME);
         orderQueue.enqueue(negativeID);
         assertFalse(orderQueue.enqueue(negativeID));
     }
@@ -58,29 +52,29 @@ public class WorkOrderQueueTest {
     // ---------------------------------------------
     @Test
     public void dequeue_RemoveOrder_OrderShouldNotBeInQueue() {
-        orderQueue.enqueue(new WorkOrder(normalID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
         orderQueue.dequeue();
-        assertFalse(orderQueue.contains(normalID));
+        assertFalse(orderQueue.contains(NORMAL_ID));
     }
     @Test
     public void dequeue_RemoveOrder_OrderShouldReturnCorrectID() {
-        orderQueue.enqueue(new WorkOrder(normalID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
 
         WorkOrder dequeued = orderQueue.dequeue();
-        assertEquals(normalID, dequeued.getId());
+        assertEquals(NORMAL_ID, dequeued.getId());
     }
     @Test
     public void dequeue_RemoveOrder_HighestRankedOrderShouldBeRemoved() throws InterruptedException {
-        orderQueue.enqueue(new WorkOrder(vipID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(managerID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(normalID));
-        Thread.sleep(sleepTime);
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(MANAGER_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
 
-        // It's expected that the managerID will be the highest ranked
+        // It's expected that the MANAGER_ID will be the highest ranked
         WorkOrder dequeued = orderQueue.dequeue();
-        assertEquals(managerID, dequeued.getId());
+        assertEquals(MANAGER_ID, dequeued.getId());
     }
     @Test
     public void dequeue_RemoveOrderFromEmptyQueue_ShouldReturnNull() {
@@ -93,14 +87,14 @@ public class WorkOrderQueueTest {
     // ---------------------------------------------
     @Test
     public void getListOfIDs_GetList_ShouldBeInRankedOrder() throws InterruptedException {
-        orderQueue.enqueue(new WorkOrder(vipID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(managerID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(normalID));
-        Thread.sleep(sleepTime);
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(MANAGER_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
 
-        List<Long> expected = Arrays.asList(managerID, vipID, normalID);
+        List<Long> expected = Arrays.asList(MANAGER_ID, VIP_ID, NORMAL_ID);
         List<Long> IDs = orderQueue.getListOfIDs();
 
         assertThat(IDs, is(expected));
@@ -117,36 +111,36 @@ public class WorkOrderQueueTest {
     // --------------------------------------------------
     @Test
     public void removeOrder_TryRemoveOrder_ShouldReturnTrueIfInList() {
-        orderQueue.enqueue(new WorkOrder(normalID));
-        orderQueue.enqueue(new WorkOrder(priorityID));
-        orderQueue.enqueue(new WorkOrder(vipID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(PRIORITY_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
 
-        assertTrue(orderQueue.removeOrder(normalID));
+        assertTrue(orderQueue.removeOrder(NORMAL_ID));
     }
     @Test
     public void removeOrder_TryRemoveOrder_ShouldBeRemovedFromList() {
-        orderQueue.enqueue(new WorkOrder(normalID));
-        orderQueue.enqueue(new WorkOrder(priorityID));
-        orderQueue.enqueue(new WorkOrder(vipID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(PRIORITY_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
 
-        orderQueue.removeOrder(normalID);
-        assertFalse(orderQueue.contains(normalID));
+        orderQueue.removeOrder(NORMAL_ID);
+        assertFalse(orderQueue.contains(NORMAL_ID));
     }
     @Test
     public void removeOrder_TryRemoveNonPresentOrder_ShouldReturnFalse() {
-        orderQueue.enqueue(new WorkOrder(normalID));
-        orderQueue.enqueue(new WorkOrder(priorityID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(PRIORITY_ID, CURRENT_TIME));
 
-        assertFalse(orderQueue.removeOrder(vipID));
+        assertFalse(orderQueue.removeOrder(VIP_ID));
     }
     @Test
     public void removeOrder_TryRemoveNegativeID_ShouldReturnFalse() {
-        orderQueue.enqueue(new WorkOrder(normalID));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
         assertFalse(orderQueue.removeOrder(-1));
     }
     @Test
     public void removeOrder_TryRemoveFromEmptyList_ShouldReturnFalse() {
-        assertFalse(orderQueue.removeOrder(vipID));
+        assertFalse(orderQueue.removeOrder(VIP_ID));
     }
 
     // --------------------------------------------------
@@ -154,24 +148,24 @@ public class WorkOrderQueueTest {
     // --------------------------------------------------
     @Test
     public void getPositionOfOrder_GetPosition_ShouldBeCorrectPosition() throws InterruptedException {
-        orderQueue.enqueue(new WorkOrder(vipID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(managerID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(normalID));
-        Thread.sleep(sleepTime);
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(MANAGER_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
 
         int expectedPosition = 2;   // third in queue
-        int actualPosition = orderQueue.getPositionOfOrder(normalID);
+        int actualPosition = orderQueue.getPositionOfOrder(NORMAL_ID);
         assertEquals(actualPosition, expectedPosition);
     }
     @Test
     public void getPositionOfOrder_TryGetNonPresentID_ShouldReturnMinusOne() {
-        orderQueue.enqueue(new WorkOrder(managerID));
-        orderQueue.enqueue(new WorkOrder(normalID));
+        orderQueue.enqueue(new WorkOrder(MANAGER_ID, CURRENT_TIME));
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
 
         int expectedPosition = -1;   // not in queue
-        int actualPosition = orderQueue.getPositionOfOrder(vipID);
+        int actualPosition = orderQueue.getPositionOfOrder(VIP_ID);
         assertEquals(actualPosition, expectedPosition);
     }
 
@@ -180,12 +174,12 @@ public class WorkOrderQueueTest {
     // --------------------------------------------------
     @Test
     public void getAverageWaitTime_GetAverage_ShouldBeAverageOfWaitTimes() throws InterruptedException {
-        orderQueue.enqueue(new WorkOrder(vipID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(managerID));
-        Thread.sleep(sleepTime);
-        orderQueue.enqueue(new WorkOrder(normalID));
-        Thread.sleep(sleepTime);
+        orderQueue.enqueue(new WorkOrder(VIP_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(MANAGER_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
+        orderQueue.enqueue(new WorkOrder(NORMAL_ID, CURRENT_TIME));
+        Thread.sleep(SLEEP_TIME);
 
         // Three orders added, with wait time of 100 ms between each
         // Approximate average will be (300ms + 200ms + 100ms) / 3 =
@@ -193,7 +187,6 @@ public class WorkOrderQueueTest {
         double expectedAverage = 0.2;
         double actualAverage = orderQueue.getAverageWaitTime();
 
-        System.out.println("Actual:" +actualAverage);
         // delta = 0.1s
         assertEquals(expectedAverage, actualAverage, 0.1);
     }

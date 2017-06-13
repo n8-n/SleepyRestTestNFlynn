@@ -30,7 +30,7 @@ public class WorkOrder implements Comparable<WorkOrder> {
     private static final int VIP = 5;
 
     // Pattern for extracting Date
-    private static final String stringFormat = "yyyy-MM-dd_HH:mm";
+    private static final String dateFormat = "yyyy-MM-dd_HH:mm";
 
     // Member variables.
     private long ID;
@@ -44,14 +44,17 @@ public class WorkOrder implements Comparable<WorkOrder> {
      *
      * @param ID of the person who made the request.
      */
-    public WorkOrder(long ID) {
-        this.ID = ID;
-        level = calculateLevel();
-        date = new Date();
-    }
+//    public WorkOrder(long ID) {
+//        this.ID = ID;
+//        level = calculateLevel();
+//        date = new Date();
+//    }
 
     /**
      * CONSTRUCTOR: Create a new order with ID and specified Date.
+     * in format yyyy-MM-dd_HH:mm. If dateString is set to "now",
+     * set date time as current time.
+     * ClassLevel is calculated based on ID.
      *
      * @param ID of person who made request.
      * @param dateString string representation of date.
@@ -59,13 +62,18 @@ public class WorkOrder implements Comparable<WorkOrder> {
     public WorkOrder(long ID, String dateString) {
         this.ID = ID;
         level = calculateLevel();
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(stringFormat);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
 
-        try {
-            date = simpleDateFormat.parse(dateString);
-        } catch (ParseException e) {
+        if (dateString.equalsIgnoreCase("now")) {
             date = new Date();
-            e.printStackTrace();
+        }
+        else {
+            try {
+                date = simpleDateFormat.parse(dateString);
+            } catch (ParseException e) {
+                date = new Date();
+                e.printStackTrace();
+            }
         }
     }
 
@@ -155,7 +163,9 @@ public class WorkOrder implements Comparable<WorkOrder> {
      * Management and normal orders rank is equal to wait time.
      * @return rank
      */
-    public double calculateRank(double waitTime) {
+    public double calculateRank() {
+        double waitTime = getWaitTime();
+
         if (level == ClassLevel.Priority) {
             return Math.max(3, waitTime * Math.log(waitTime));
         }
@@ -165,16 +175,6 @@ public class WorkOrder implements Comparable<WorkOrder> {
         else {
             return waitTime;
         }
-    }
-
-    /**
-     * Calculate an orders rank based on class level and wait time.
-     * If no waitTime is given, calculate it.
-     * @return rank
-     */
-    public double calculateRank() {
-        double waitTime = getWaitTime();
-        return calculateRank(waitTime);
     }
 
     /*
@@ -190,5 +190,18 @@ public class WorkOrder implements Comparable<WorkOrder> {
 
     public Date getDate() {
         return date;
+    }
+
+    /**
+     * Get the date as a string in specified format.
+     * @return date as string.
+     */
+    public String getDateString() {
+        String dateString = "";
+        SimpleDateFormat sdf = new SimpleDateFormat(dateFormat);
+
+        dateString = sdf.format(date);
+
+        return dateString;
     }
 }
