@@ -38,19 +38,6 @@ public class WorkOrder implements Comparable<WorkOrder> {
     private ClassLevel level;
 
     /**
-     * CONSTRUCTOR: Creates a new order with ID.
-     * Date is set as time of creation.
-     * ClassLevel is calculated based on ID.
-     *
-     * @param ID of the person who made the request.
-     */
-//    public WorkOrder(long ID) {
-//        this.ID = ID;
-//        level = calculateLevel();
-//        date = new Date();
-//    }
-
-    /**
      * CONSTRUCTOR: Create a new order with ID and specified Date.
      * in format yyyy-MM-dd_HH:mm. If dateString is set to "now",
      * set date time as current time.
@@ -88,29 +75,6 @@ public class WorkOrder implements Comparable<WorkOrder> {
         double timeDifference = now.getTime() - date.getTime();
 
         return timeDifference / 1000; // return time in seconds.
-    }
-
-    /**
-     * IDs divisible by 3 are priority.
-     * Divisible by 5 are VIP.
-     * Divisible by 3 and 5 are manager.
-     * The rest are normal.
-     *
-     * @return ClassLevel
-     */
-    private ClassLevel calculateLevel() {
-        if ((ID % PRIORITY == 0) && (ID % VIP == 0)) {
-            return ClassLevel.Manager;
-        }
-        else if (ID % VIP == 0) {
-            return ClassLevel.VIP;
-        }
-        else if (ID % PRIORITY == 0) {
-            return ClassLevel.Priority;
-        }
-        else {
-            return ClassLevel.Normal;
-        }
     }
 
     /**
@@ -203,5 +167,28 @@ public class WorkOrder implements Comparable<WorkOrder> {
         dateString = sdf.format(date);
 
         return dateString;
+    }
+
+    /**
+     * IDs divisible by 3 are priority.
+     * Divisible by 5 are VIP.
+     * Divisible by 3 and 5 are manager.
+     * The rest are normal.
+     *
+     * @return ClassLevel
+     */
+    private ClassLevel calculateLevel() {
+        if ((ID % PRIORITY == 0) && (ID % VIP == 0)) {
+            return ClassLevel.Manager;
+        }
+        else if (ID % VIP == 0) {
+            return ClassLevel.VIP;
+        }
+        else if (ID % PRIORITY == 0) {
+            return ClassLevel.Priority;
+        }
+        else {
+            return ClassLevel.Normal;
+        }
     }
 }

@@ -34,19 +34,23 @@ public class QueueController {
      * @param id of the user making the order
      * @param date of order. Use "now" for current time.
      * @return CREATED code and the created order.
-     *         Or a BAD_REQUEST code and empty body.
+     *         BAD_REQUEST code and empty body if ID is less than 1.
+     *         CONFLICT if the ID is already present.
      */
     @RequestMapping(value = "/{id}/{date}", method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<WorkOrderResponse> enqueue(@PathVariable("id") long id, @PathVariable("date") String date) {
         WorkOrder order = new WorkOrder(id, date);
 
-        if (workOrderQueue.enqueue(order)) {
+        if (id < 1) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+        }
+        else if (workOrderQueue.enqueue(order)) {
             WorkOrderResponse response = new WorkOrderResponse(order.getId(), order.getDateString());
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         }
         else {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
     }
 
@@ -58,7 +62,15 @@ public class QueueController {
     @RequestMapping(value = "/top", method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<WorkOrderResponse> dequeue() {
-        return null;
+        WorkOrder order = workOrderQueue.dequeue();
+
+        if (order != null) {
+            WorkOrderResponse response = new WorkOrderResponse(order.getId(), order.getDateString());
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        }
+        else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
     }
 
     /**
@@ -77,12 +89,18 @@ public class QueueController {
     /**
      * Remove the specified order from the queue.
      * @param id of order
-     * @return The specified order and OK.
+     * @return ID and OK status or
      *         NOT_FOUND if order is not in queue.
+     *         BAD_REQUEST if ID less than 1.
      */
     @RequestMapping(value = "/{id}", method = RequestMethod.DELETE)
-    public ResponseEntity<WorkOrderResponse> remove(@PathVariable("id") long id) {
-        return null;
+    public ResponseEntity<Long> remove(@PathVariable("id") long id) {
+        if (id < 0) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(id);
+        }
+
+        HttpStatus result = workOrderQueue.removeOrder(id) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
+        return ResponseEntity.status(result).body(id);
     }
 
     /**
@@ -94,7 +112,7 @@ public class QueueController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public int position(@PathVariable("id") long id) {
-        return 0;
+        return workOrderQueue.getPositionOfOrder(id);
     }
 
     /**
@@ -105,7 +123,7 @@ public class QueueController {
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
     public double waitTime() {
-        return 0;
+        return workOrderQueue.getAverageWaitTime();
     }
 
     /**

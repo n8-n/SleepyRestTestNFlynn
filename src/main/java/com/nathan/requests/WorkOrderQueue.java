@@ -84,7 +84,7 @@ public class WorkOrderQueue {
     public boolean removeOrder(long ID) {
         boolean result = false;
 
-        if ((queue.size() > 0) || (ID > 0)) {
+        if ((queue.size() > -1) || (ID > 0)) {
             result = queue.remove(new WorkOrder(ID, currentTime));
             Collections.sort(queue);
         }
