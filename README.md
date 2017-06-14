@@ -11,7 +11,6 @@ java -jar target\SleepyRestTest-1.0.jar
 
  
 ## API Definition
-http://localhost:8080/ 
 
 Resource                |   Result
 ----------------------- | ---------------------------
