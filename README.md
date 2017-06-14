@@ -2,10 +2,13 @@
 git clone https://github.com/n8-n/SleepyRestTestNFlynn.git 
 
 cd SleepyRestTestNFlynn
+
 mvn package
+
 java -jar target\SleepyRestTest-1.0.jar
  
- 
+
+
  
 ## API Definition
 http://localhost:8080/ 
