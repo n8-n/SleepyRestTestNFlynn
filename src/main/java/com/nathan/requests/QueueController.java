@@ -16,17 +16,41 @@ import java.util.List;
 @RequestMapping(value = "queue")
 public class QueueController {
     private static WorkOrderQueue workOrderQueue = new WorkOrderQueue();
-    private static final String apiInfo = "Welcome to Tim's work order API.";
 
     /**
-     * Default path value.
-     *
-     * @return API information
+     * Gets a list of order IDs, sorted from highest rank
+     * to lowest.
+     * @return List of longs.
+     *         Or empty list if no orders.
      */
-    @RequestMapping
+    @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public String info() {
-        return apiInfo;
+    @ResponseStatus(HttpStatus.OK)
+    public List<Long> list() {
+        return workOrderQueue.getListOfIDs();
+    }
+
+    /**
+     * Get position of order in queue.
+     * @param id of order to find.
+     * @return position, or -1 if not present.
+     */
+    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public int position(@PathVariable("id") long id) {
+        return workOrderQueue.getPositionOfOrder(id);
+    }
+
+    /**
+     * Get average wait time of all orders.
+     * @return wait time, or zero if empty.
+     */
+    @RequestMapping(value = "/meantime", method = RequestMethod.GET)
+    @ResponseStatus(HttpStatus.OK)
+    @ResponseBody
+    public double waitTime() {
+        return workOrderQueue.getAverageWaitTime();
     }
 
     /**
@@ -59,7 +83,7 @@ public class QueueController {
      * @return The first order and OK.
      *         NOT_FOUND if queue is empty.
      */
-    @RequestMapping(value = "/top", method = RequestMethod.DELETE)
+    @RequestMapping(method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<WorkOrderResponse> dequeue() {
         WorkOrder order = workOrderQueue.dequeue();
@@ -71,19 +95,6 @@ public class QueueController {
         else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
-    }
-
-    /**
-     * Gets a list of order IDs, sorted from highest rank
-     * to lowest.
-     * @return List of longs.
-     *         Or empty list if no orders.
-     */
-    @RequestMapping(value = "/list", method = RequestMethod.GET)
-    @ResponseBody
-    @ResponseStatus(HttpStatus.OK)
-    public List<Long> list() {
-        return workOrderQueue.getListOfIDs();
     }
 
     /**
@@ -101,29 +112,6 @@ public class QueueController {
 
         HttpStatus result = workOrderQueue.removeOrder(id) ? HttpStatus.OK : HttpStatus.NOT_FOUND;
         return ResponseEntity.status(result).body(id);
-    }
-
-    /**
-     * Get position of order in queue.
-     * @param id of order to find.
-     * @return position, or -1 if not present.
-     */
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public int position(@PathVariable("id") long id) {
-        return workOrderQueue.getPositionOfOrder(id);
-    }
-
-    /**
-     * Get average wait time of all orders.
-     * @return wait time, or zero if empty.
-     */
-    @RequestMapping(value = "/averagewait", method = RequestMethod.GET)
-    @ResponseStatus(HttpStatus.OK)
-    @ResponseBody
-    public double waitTime() {
-        return workOrderQueue.getAverageWaitTime();
     }
 
     /**

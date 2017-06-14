@@ -62,18 +62,18 @@ public class QueueControllerTest {
     @Test
     public void dequeue_GetTopOrder_ShouldReturnOKCode() throws Exception {
         mockMvc.perform(post("/queue/{id}/{date}", NORMAL_ID, CURRENT_TIME));
-        mockMvc.perform(delete("/queue/top"))
+        mockMvc.perform(delete("/queue"))
                 .andExpect(status().isOk());
     }
     @Test
     public void dequeue_GetTopOrderEmptyQueue_ShouldReturnNotFoundCode() throws Exception {
-        mockMvc.perform(delete("/queue/top"))
+        mockMvc.perform(delete("/queue"))
                 .andExpect(status().isNotFound());
     }
     @Test
     public void dequeue_GetTopOrder_ShouldReturnOrderInBody() throws Exception {
         mockMvc.perform(post("/queue/{id}/{date}", NORMAL_ID, CURRENT_TIME));
-        String resultString = mockMvc.perform(delete("/queue/top"))
+        String resultString = mockMvc.perform(delete("/queue"))
                 .andReturn().getResponse().getContentAsString();
 
         long actualID = JsonPath.with(resultString).getLong("id");
@@ -105,7 +105,7 @@ public class QueueControllerTest {
     // ---------------------------------------------
     @Test
     public void list_GetList_ShouldReturnOKCode() throws Exception {
-        mockMvc.perform(get("/queue/list"))
+        mockMvc.perform(get("/queue"))
                 .andExpect(status().isOk());
     }
 
@@ -123,7 +123,7 @@ public class QueueControllerTest {
     // ---------------------------------------------
     @Test
     public void waitTime_GetWaitTime_ShouldReturnOKCode() throws Exception {
-        mockMvc.perform(get("/queue/averagewait"))
+        mockMvc.perform(get("/queue/meantime"))
                 .andExpect(status().isOk());
     }
 }

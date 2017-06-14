@@ -33,7 +33,7 @@ public class WorkOrderQueue {
     public boolean enqueue(WorkOrder order) {
         boolean result;
 
-        if (queue.contains(order) || (order.getId() <= 0)) {
+        if (queue.contains(order) || (order.getId() < 1)) {
             result =  false;
         }
         else {

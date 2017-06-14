@@ -25,6 +25,10 @@ public class WorkOrderQueueTest {
     public void createWorkOrderQueue() {
         orderQueue = new WorkOrderQueue();
     }
+    @After
+    public void tearDownWorkOrderQueue() {
+        orderQueue = null;
+    }
 
     // ---------------------------------------------
     // enqueue
